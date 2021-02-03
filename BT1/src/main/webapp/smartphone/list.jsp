@@ -6,6 +6,7 @@
 </head>
 <body>
 <h1>List SmartPhone</h1>
+<a href="/smartphone?action=create">Create SmartPhone</a>
 <table>
     <tr>
         <td>Serial</td>
