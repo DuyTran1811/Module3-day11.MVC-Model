@@ -28,7 +28,6 @@
             </tr>
             <tr>
                 <td><input type="submit" value="Delete customer"></td>
-                <td><a href="${pageContext.request.contextPath}/customers">Back to customer list</a></td>
             </tr>
         </table>
     </fieldset>

@@ -159,7 +159,7 @@ public class CustomerServlet extends HttpServlet {
         String name = request.getParameter("name");
         String email = request.getParameter("email");
         String address = request.getParameter("address");
-        int id = (int) (Math.random() * 1000);
+        int id = (int) (Math.random() * 10000);
         Customer customer = new Customer(id, name, email, address);
         this.customerService.save(customer);
         RequestDispatcher dispatcher = request.getRequestDispatcher("customer/create.jsp");

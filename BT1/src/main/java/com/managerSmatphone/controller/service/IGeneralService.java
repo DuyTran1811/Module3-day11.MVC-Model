@@ -7,7 +7,7 @@ public interface IGeneralService<T> {
 
     T save(T t);
 
-    T updateById(int id, T t);
+    T update(int id, T t);
 
     T findById(int id);
 

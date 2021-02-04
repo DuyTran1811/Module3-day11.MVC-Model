@@ -1,8 +1,8 @@
 package com.managerSmatphone.controller;
 
-import com.managerSmatphone.controller.model.SmartPhone;
-import com.managerSmatphone.controller.service.ISmartPhoneService;
-import com.managerSmatphone.controller.service.SmartPhoneService;
+import com.managerSmatphone.controller.model.Product;
+import com.managerSmatphone.controller.service.IProductService;
+import com.managerSmatphone.controller.service.ProductService;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -10,9 +10,9 @@ import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "SmartPhoneServlet", value = "/smartphone")
+@WebServlet(name = "SmartPhoneServlet", value = "/products")
 public class SmartPhoneServlet extends HttpServlet {
-    private static final ISmartPhoneService smartPhoneService = new SmartPhoneService();
+    private static final IProductService productService = new ProductService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -22,32 +22,58 @@ public class SmartPhoneServlet extends HttpServlet {
         }
         switch (action) {
             case "create":
-                showCreateSmartPhone(request, response);
+                showCreateForm(request, response);
                 break;
             case "edit":
-                showEditSmartPhone(request, response);
+                showEditProduct(request, response);
                 break;
             case "delete":
-                showDeleteSmartPhone(request, response);
+                showDelete(request, response);
                 break;
             case "view":
                 break;
             default:
-                showAllSmartPhone(request, response);
+                showListProduct(request, response);
                 break;
         }
     }
 
-    private void showDeleteSmartPhone(HttpServletRequest request, HttpServletResponse response) {
+    private void showDelete(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getParameter("id"));
-        SmartPhone smartPhone = smartPhoneService.findById(id);
+        Product product = productService.findById(id);
         RequestDispatcher dispatcher;
-        if (smartPhone == null) {
-            dispatcher = request.getRequestDispatcher("/index.jsp");
+        if (product == null) {
+            dispatcher = request.getRequestDispatcher("index.jsp");
+        }else {
+            request.setAttribute("list",product);
+            dispatcher = request.getRequestDispatcher("product/delete.jsp");
+            try {
+                dispatcher.forward(request,response);
+            } catch (ServletException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void showEditProduct(HttpServletRequest request, HttpServletResponse response) {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Product product = productService.findById(id);
+        RequestDispatcher dispatcher;
+        if (product == null) {
+            dispatcher = request.getRequestDispatcher("index.jsp");
         } else {
-            request.setAttribute("sp", smartPhone);
-            dispatcher = request.getRequestDispatcher("smartphone/delete.jsp");
+            request.setAttribute("product", product);
+            dispatcher = request.getRequestDispatcher("product/edit.jsp");
+            try {
+                dispatcher.forward(request, response);
+            } catch (ServletException | IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private void showCreateForm(HttpServletRequest request, HttpServletResponse response) {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("product/create.jsp");
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
@@ -55,8 +81,10 @@ public class SmartPhoneServlet extends HttpServlet {
         }
     }
 
-    private void showEditSmartPhone(HttpServletRequest request, HttpServletResponse response) {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("smartphone/edit.jsp");
+    private void showListProduct(HttpServletRequest request, HttpServletResponse response) {
+        List<Product> products = productService.findAll();
+        request.setAttribute("products", products);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("product/list.jsp");
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
@@ -64,25 +92,6 @@ public class SmartPhoneServlet extends HttpServlet {
         }
     }
 
-    private void showCreateSmartPhone(HttpServletRequest request, HttpServletResponse response) {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("smartphone/create.jsp");
-        try {
-            dispatcher.forward(request, response);
-        } catch (ServletException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void showAllSmartPhone(HttpServletRequest request, HttpServletResponse response) {
-        List<SmartPhone> list = smartPhoneService.findAll();
-        request.setAttribute("listSmartPhone", list);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("smartphone/list.jsp");
-        try {
-            dispatcher.forward(request, response);
-        } catch (ServletException | IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -92,44 +101,62 @@ public class SmartPhoneServlet extends HttpServlet {
         }
         switch (action) {
             case "create":
-                createSmartPhone(request, response);
+                createProduct(request, response);
                 break;
             case "edit":
-                editSmartPhone(request, response);
+                editProduct(request, response);
                 break;
-            case "detele":
-                deleteSmartPhone(request, response);
+            case "delete":
+                deleteProduct(request, response);
                 break;
         }
     }
 
-    private void deleteSmartPhone(HttpServletRequest request, HttpServletResponse response) {
+    private void deleteProduct(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getParameter("id"));
-        smartPhoneService.deleteById(id);
-        try {
-            response.sendRedirect("/smartphone");
-        } catch (IOException e) {
-            e.printStackTrace();
+        Product product = productService.findById(id);
+        RequestDispatcher dispatcher;
+        if (product == null) {
+            dispatcher = request.getRequestDispatcher("index.jsp");
+        } else {
+            productService.deleteById(id);
+            try {
+                response.sendRedirect("/products");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void editSmartPhone(HttpServletRequest request, HttpServletResponse response) {
-    }
-
-    private void createSmartPhone(HttpServletRequest request, HttpServletResponse response) {
-        String brand = request.getParameter("brand");
+    private void editProduct(HttpServletRequest request, HttpServletResponse response) {
         String name = request.getParameter("name");
-        float price = Integer.parseInt(request.getParameter("price"));
-        String yearproduct = request.getParameter("yearproduct");
-        String sezicreen = request.getParameter("sezicreen");
-        int id = (int) (Math.random() * 10000);
-        SmartPhone smartPhone = new SmartPhone(id, brand, name, price, yearproduct, sezicreen);
-        smartPhoneService.save(smartPhone);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("smartphone/create.jsp");
+        double price = Double.parseDouble(request.getParameter("price"));
+        String description = request.getParameter("description");
+        int id = Integer.parseInt(request.getParameter("id"));
+        Product product = new Product(id, name, price, description);
+        productService.update(id, product);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/product/edit.jsp");
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
             e.printStackTrace();
         }
     }
+
+    private void createProduct(HttpServletRequest request, HttpServletResponse response) {
+        String name = request.getParameter("name");
+        double price = Double.parseDouble(request.getParameter("price"));
+        String description = request.getParameter("description");
+        int id = (int) (Math.random() * 10000);
+        Product product = new Product(id, name, price, description);
+        productService.save(product);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("product/create.jsp");
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
